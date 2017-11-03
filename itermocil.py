@@ -269,6 +269,28 @@ class Itermocil(object):
                     cp = pp + 1 + q
                     i += 1
                     self.applescript.append(create_pane(qp, cp, "vertical"))
+            
+        # 'layout-*' layouts create multi columns by configure
+        # the pane num will ordery by vertical.
+        # eg:layout-3-2-1, first colmun is 1/2/3 from top to bottom, second is 4/5, third is 6
+        elif layout.startswith("layout-"):
+
+            layout_conf = layout.replace("layout-", "")
+            if len(layout_conf) < 1:
+                raise ValueError("layout list is empty")
+            layout_list = layout_conf.split("-")
+
+            last = 1
+            for col in range(0, len(layout_list)-1):
+                self.applescript.append(create_pane(last, last+int(layout_list[col]), "vertical"))
+                last += int(layout_list[col])
+            
+            last = 1
+            for col in range(0, len(layout_list)):
+                for row in range(0, int(layout_list[col])-1):
+                    self.applescript.append(create_pane(last, last+1, "horizontal"))
+                    last += 1
+                last += 1
 
         # Raise an exception if we don't recognise the layout setting.
         else:
